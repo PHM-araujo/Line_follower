@@ -1,18 +1,27 @@
 #include "LineFollower.hpp"
+#include "defines.hpp"
 
 // Framework includes
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 State* LineFollower::current_state = nullptr;
 /**
  * @brief: Default constructor
 */
-LineFollower::LineFollower(){}
+LineFollower::LineFollower(){
+    ESP_LOGI("[ROBOT]", "Called constructor");
+
+    // Pin configuration
+    motor_left = Motor(PWM_1_ESQ, PWM_2_ESQ, EN_ESQ, LEDC_CHANNEL_0, LEDC_CHANNEL_1);
+    motor_right = Motor(GPIO_NUM_5, GPIO_NUM_22, GPIO_NUM_4, LEDC_CHANNEL_2, LEDC_CHANNEL_3);
+}
 /**
  * @brief: Default destructor
 */
 LineFollower::~LineFollower(){
-    ESP_LOGI("[FSM]", "Called destructor");
+    ESP_LOGI("[ROBOT]", "Called destructor");
     delete current_state;
 }
 /**
@@ -47,4 +56,29 @@ void LineFollower::UpdateStateRoutine(void *pvParameters) {
     while(1){
         current_state->Update();
     }
+}
+/**
+ * @brief: Initialize the subsystems
+*/
+void LineFollower::InitSubsystems(){
+    ESP_LOGI("[ROBOT]", "Initializing subsystems");
+    motor_left.Init();
+    motor_right.Init();
+}
+/**
+ * @brief: Test the motors
+*/
+void LineFollower::TestMotors(){
+    ESP_LOGI("[ROBOT]", "Testing motors");
+    motor_left.SetDuty(8191);
+    motor_right.SetDuty(8191);
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    motor_left.SetDuty(0);
+    motor_right.SetDuty(0);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    motor_left.SetDuty(-8191);
+    motor_right.SetDuty(-8191);
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    motor_left.SetDuty(0);
+    motor_right.SetDuty(0);
 }

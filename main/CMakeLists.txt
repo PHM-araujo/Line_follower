@@ -7,6 +7,11 @@ set(FSM_SRC
 	<FSM/Stopped/Stopped.cpp>
 )
 
+set(NavigationSubsystem_SRC
+	<NavigationSubsystem/Motor/Motor.cpp>
+	<NavigationSubsystem/ReflectanceSensor/ReflectanceSensor.cpp>
+)
+
 
 
 idf_component_register(
@@ -14,6 +19,7 @@ idf_component_register(
 		"main.cpp"
 		"LineFollower/LineFollower.cpp"
 		${FSM_SRC}
+		${NavigationSubsystem_SRC}
 		
 	INCLUDE_DIRS
     	"."
@@ -25,4 +31,6 @@ idf_component_register(
 		"FSM/Navigating/"
 		"FSM/Stopping/"
 		"FSM/Stopped/"
+		"NavigationSubsystem/Motor/"
+		"NavigationSubsystem/ReflectanceSensor/"
 )
