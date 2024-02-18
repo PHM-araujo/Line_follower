@@ -1,17 +1,19 @@
-/*
- * SPDX-FileCopyrightText: 2010-2022 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: CC0-1.0
- */
+#include "LineFollower.hpp"
+#include "Starting.hpp"
 
-#include <stdio.h>
-#include <inttypes.h>
-#include "sdkconfig.h"
+// FreeRTOS includes
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_chip_info.h"
-#include "esp_flash.h"
+
+
+LineFollower line_follower;
 
 extern "C" void app_main(void) {
-    
+    // Start the state machine
+    line_follower.TransitionTo(new Starting());
+
+    // Create the Robot Routines
+    xTaskCreate(&LineFollower::UpdateStateRoutine, "UpdateStateRoutine", 2048, NULL, 5, NULL);
+
+    vTaskDelete(NULL);
 }
