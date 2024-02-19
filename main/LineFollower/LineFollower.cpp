@@ -15,7 +15,7 @@ LineFollower::LineFollower(){
 
     // Pin configuration
     motor_left = Motor(PWM_1_ESQ, PWM_2_ESQ, EN_ESQ, LEDC_CHANNEL_0, LEDC_CHANNEL_1);
-    motor_right = Motor(GPIO_NUM_5, GPIO_NUM_22, GPIO_NUM_4, LEDC_CHANNEL_2, LEDC_CHANNEL_3);
+    motor_right = Motor(PWM_1_DIR, PWM_2_DIR, EN_DIR, LEDC_CHANNEL_2, LEDC_CHANNEL_3);
 }
 /**
  * @brief: Default destructor
@@ -72,13 +72,13 @@ void LineFollower::TestMotors(){
     ESP_LOGI("[ROBOT]", "Testing motors");
     motor_left.SetDuty(8191);
     motor_right.SetDuty(8191);
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
     motor_left.SetDuty(0);
     motor_right.SetDuty(0);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
     motor_left.SetDuty(-8191);
     motor_right.SetDuty(-8191);
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
     motor_left.SetDuty(0);
     motor_right.SetDuty(0);
 }

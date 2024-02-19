@@ -115,13 +115,10 @@ void Motor::Stop() {
  * @note The direction is determined by the sign of the duty cycle
 */
 void Motor::SetDuty(int duty) {
-    // Calculate the direction
-    duty = duty >= 0 ? duty : -1 * duty;
-
     // Set the duty cycle for the forward and backward channels
-    ledc_set_duty(speed_mode, channel_forward,duty);
+    ledc_set_duty(speed_mode, channel_forward, duty >= 0 ? duty : 0);
     ledc_update_duty(speed_mode, channel_forward);
 
-    ledc_set_duty(speed_mode, channel_backward,duty);
+    ledc_set_duty(speed_mode, channel_backward, duty >= 0 ? 0 : -1*duty);
     ledc_update_duty(speed_mode, channel_backward);
 }
