@@ -1,9 +1,23 @@
 #include "Motor.hpp"
 #include "esp_log.h"
 
+// bibliotecas para o encoder
+#include "driver/gpio.h"
+#include "driver/timer.h"
+
 /**
  * @brief Default Constructor
 */
+
+using namespace std;
+
+// Variáveis globais para o encoder
+volatile int passos = 0;
+volatile int lastEncoded = 0;
+
+
+
+
 Motor::Motor() {
   pin_forward = GPIO_NUM_0;
   pin_backward = GPIO_NUM_0;
@@ -122,3 +136,144 @@ void Motor::SetDuty(int duty) {
     ledc_set_duty(speed_mode, channel_backward, duty >= 0 ? 0 : -1*duty);
     ledc_update_duty(speed_mode, channel_backward);
 }
+
+
+
+/*#include "Motor.hpp"
+#include "esp_log.h"
+
+// Adicione essas bibliotecas para o encoder
+#include "driver/gpio.h"
+#include "driver/timer.h"
+
+using namespace std;
+
+// Variáveis globais para o encoder
+volatile int passos = 0;
+volatile int lastEncoded = 0;
+
+// ISR para lidar com as interrupções do encoder
+void IRAM_ATTR isr_handler() {
+    int MSB = gpio_get_level(encoderPin1); // MSB = most significant bit
+    int LSB = gpio_get_level(encoderPin2); // LSB = least significant bit
+
+    int encoded = (MSB << 1) | LSB; // converting the 2 pin value to single number
+    int sum  = (lastEncoded << 2) | encoded; // adding it to the previous encoded value
+
+    if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) passos--;
+    if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) passos++;
+
+    lastEncoded = encoded; // store this value for next time
+}
+
+// Adicione esses métodos à classe Motor
+void Motor::init_encoder(int enc1, int enc2) {
+    // Configuração dos pinos do encoder
+    gpio_set_direction(enc1, GPIO_MODE_INPUT);
+    gpio_set_direction(enc2, GPIO_MODE_INPUT);
+    gpio_set_intr_type(enc1, GPIO_INTR_ANYEDGE);
+    gpio_set_intr_type(enc2, GPIO_INTR_ANYEDGE);
+    gpio_isr_handler_add(enc1, isr_handler, NULL);
+    gpio_isr_handler_add(enc2, isr_handler, NULL);
+}
+
+int Motor::get_passos() {
+    return passos;
+}
+
+Motor::Motor() {
+  pin_forward = GPIO_NUM_0;
+  pin_backward = GPIO_NUM_0;
+  en = GPIO_NUM_0;
+  channel_forward = LEDC_CHANNEL_0;
+  channel_backward = LEDC_CHANNEL_1;
+  speed_mode = LEDC_HIGH_SPEED_MODE;
+  timer_sel = LEDC_TIMER_0;
+  duty = 0;
+  hpoint = 0;
+}
+
+Motor::Motor(gpio_num_t pin_forward, gpio_num_t pin_backward, gpio_num_t en, 
+        ledc_channel_t channel_forward, 
+        ledc_channel_t channel_backward) {
+  
+    this->pin_forward = pin_forward;
+    this->pin_backward = pin_backward;
+    this->en = en;
+
+    this->channel_forward = channel_forward;
+    this->channel_backward = channel_backward;
+    speed_mode = LEDC_HIGH_SPEED_MODE;
+    timer_sel = LEDC_TIMER_0;
+    duty = 0;
+    hpoint = 0;
+}
+
+Motor::~Motor() {
+  Stop();
+}
+
+void Motor::Init() {
+    gpio_set_direction(pin_forward, GPIO_MODE_OUTPUT);
+    gpio_set_direction(pin_backward, GPIO_MODE_OUTPUT);
+    gpio_set_direction(en, GPIO_MODE_OUTPUT);
+    gpio_set_level(en, 1);  // Enable the motor
+
+    // Incializa o Timer usado pelo PWM como frequencia e resolução do PWM
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode = LEDC_HIGH_SPEED_MODE,     // timer mode
+        .duty_resolution = LEDC_TIMER_13_BIT,   // resolution of PWM duty
+        .timer_num = LEDC_TIMER_0,              // timer index
+        .freq_hz = 5000,                        // frequency of PWM signal
+        .clk_cfg = LEDC_AUTO_CLK                // Auto select the source clock
+    };
+
+    ledc_timer_config(&ledc_timer);
+
+    // Inicializa os canais do PWM
+    ledc_channel_config_t ledc_channel_forward = {
+      .gpio_num   = pin_forward,
+      .speed_mode = speed_mode,
+      .channel    = channel_forward,
+      .intr_type  = LEDC_INTR_DISABLE,
+      .timer_sel  = timer_sel,
+      .duty       = duty,
+      .hpoint     = hpoint,
+      .flags      = 0,
+    };
+    ledc_channel_config(&ledc_channel_forward);
+
+    ledc_channel_config_t ledc_channel_backward = {
+      .gpio_num   = pin_backward,
+      .speed_mode = speed_mode,
+      .channel    = channel_backward,
+      .intr_type  = LEDC_INTR_DISABLE,
+      .timer_sel  = timer_sel,
+      .duty       = duty,
+      .hpoint     = hpoint,
+      .flags      = 0 
+    };
+    ledc_channel_config(&ledc_channel_backward);
+
+    // Initialize fade service.
+    ledc_fade_func_install(0);
+}
+
+void Motor::Stop() {
+  // Set the duty cycle for the forward and backward channels
+  ledc_set_duty(speed_mode, channel_forward, HIGH);
+  ledc_update_duty(speed_mode, channel_forward);
+
+  ledc_set_duty(speed_mode, channel_backward, HIGH);
+  ledc_update_duty(speed_mode, channel_backward);
+}
+
+void Motor::SetDuty(int duty) {
+    // Set the duty cycle for the forward and backward channels
+    ledc_set_duty(speed_mode, channel_forward, duty >= 0 ? duty : 0);
+    ledc_update_duty(speed_mode, channel_forward);
+
+    ledc_set_duty(speed_mode, channel_backward, duty >= 0 ? 0 : -1*duty);
+    ledc_update_duty(speed_mode, channel_backward);
+}
+*/
